@@ -12,10 +12,10 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 
-	"github.com/ozonmp/omp-template-api/internal/config"
-	"github.com/ozonmp/omp-template-api/internal/database"
-	"github.com/ozonmp/omp-template-api/internal/server"
-	"github.com/ozonmp/omp-template-api/internal/tracer"
+	"github.com/vvvvgross/catalog-category-service/internal/config"
+	"github.com/vvvvgross/catalog-category-service/internal/database"
+	"github.com/vvvvgross/catalog-category-service/internal/server"
+	"github.com/vvvvgross/catalog-category-service/internal/tracer"
 )
 
 var (

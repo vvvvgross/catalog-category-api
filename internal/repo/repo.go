@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/ozonmp/omp-template-api/internal/model"
+	"github.com/vvvvgross/catalog-category-service/internal/model"
 )
 
 // Repo is DAO for Template

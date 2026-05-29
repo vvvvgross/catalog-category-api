@@ -7,6 +7,7 @@ export GO111MODULE=on
 
 SERVICE_NAME=omp-template-api
 SERVICE_PATH=ozonmp/omp-template-api
+ROOT_MODULE_PATH=vvvvgross/catalog-category-service
 
 PGV_VERSION:="v0.6.1"
 BUF_VERSION:="v1.16.0"

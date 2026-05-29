@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/ozonmp/omp-template-api/internal/repo"
+	"github.com/vvvvgross/catalog-category-service/internal/repo"
 
 	pb "github.com/ozonmp/omp-template-api/pkg/omp-template-api"
 )

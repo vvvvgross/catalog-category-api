@@ -24,10 +24,10 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
-	"github.com/ozonmp/omp-template-api/internal/api"
-	"github.com/ozonmp/omp-template-api/internal/config"
-	"github.com/ozonmp/omp-template-api/internal/repo"
 	pb "github.com/ozonmp/omp-template-api/pkg/omp-template-api"
+	"github.com/vvvvgross/catalog-category-service/internal/api"
+	"github.com/vvvvgross/catalog-category-service/internal/config"
+	"github.com/vvvvgross/catalog-category-service/internal/repo"
 )
 
 // GrpcServer is gRPC server
