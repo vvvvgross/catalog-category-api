@@ -60,7 +60,7 @@ message Category {
 }
 
 message CreateCategoryV1Request {
-  string foo = 1;
+  string foo = 1 [(validate.rules).string = {min_len: 1, max_len: 255}];
 }
 
 message CreateCategoryV1Response {
@@ -68,7 +68,7 @@ message CreateCategoryV1Response {
 }
 
 message DescribeCategoryV1Request {
-  uint64 category_id = 1;
+  uint64 category_id = 1 [(validate.rules).uint64.gt = 0];
 }
 
 message DescribeCategoryV1Response {
@@ -82,7 +82,7 @@ message ListCategoriesV1Response {
 }
 
 message RemoveCategoryV1Request {
-  uint64 category_id = 1;
+  uint64 category_id = 1 [(validate.rules).uint64.gt = 0];
 }
 
 message RemoveCategoryV1Response {
