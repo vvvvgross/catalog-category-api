@@ -16,6 +16,28 @@ service OmpTemplateApiService {
       get: "/v1/templates/{template_id}"
     };
   }
+
+  rpc CreateCategoryV1(CreateCategoryV1Request) returns (CreateCategoryV1Response) {
+    option (google.api.http) = {
+      post: "/v1/categories"
+      body: "*"
+    };
+  }
+  rpc DescribeCategoryV1(DescribeCategoryV1Request) returns (DescribeCategoryV1Response) {
+    option (google.api.http) = {
+      get: "/v1/categories/{category_id}"
+    };
+  }
+  rpc ListCategoriesV1(ListCategoriesV1Request) returns (ListCategoriesV1Response) {
+    option (google.api.http) = {
+      get: "/v1/categories"
+    };
+  }
+  rpc RemoveCategoryV1(RemoveCategoryV1Request) returns (RemoveCategoryV1Response) {
+    option (google.api.http) = {
+      delete: "/v1/categories/{category_id}"
+    };
+  }
 }
 
 message Template {
@@ -30,4 +52,39 @@ message DescribeTemplateV1Request {
 
 message DescribeTemplateV1Response {
   Template value = 1;
+}
+
+message Category {
+  uint64 id = 1;
+  string foo = 2;
+}
+
+message CreateCategoryV1Request {
+  string foo = 1;
+}
+
+message CreateCategoryV1Response {
+  uint64 category_id = 1;
+}
+
+message DescribeCategoryV1Request {
+  uint64 category_id = 1;
+}
+
+message DescribeCategoryV1Response {
+  Category value = 1;
+}
+
+message ListCategoriesV1Request {}
+
+message ListCategoriesV1Response {
+  repeated Category items = 1;
+}
+
+message RemoveCategoryV1Request {
+  uint64 category_id = 1;
+}
+
+message RemoveCategoryV1Response {
+  bool found = 1;
 }
