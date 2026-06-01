@@ -1,4 +1,4 @@
-module github.com/vvvvgross/catalog-category-service
+module github.com/vvvvgross/catalog-category-api
 
 go 1.25.1
 
@@ -10,7 +10,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.3
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/ozonmp/omp-template-api/pkg/omp-template-api v0.0.0-00010101000000-000000000000
+	github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api v0.0.0-00010101000000-000000000000
 	github.com/pressly/goose/v3 v3.1.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rs/zerolog v1.24.0
@@ -53,4 +53,4 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
-replace github.com/ozonmp/omp-template-api/pkg/omp-template-api => ./pkg/omp-template-api
+replace github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api => ./pkg/catalog-category-api

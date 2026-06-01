@@ -5,12 +5,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/vvvvgross/catalog-category-service/internal/model"
+	"github.com/vvvvgross/catalog-category-api/internal/model"
 )
 
-// Repo is DAO for Template
 type Repo interface {
-	DescribeTemplate(ctx context.Context, templateID uint64) (*model.Template, error)
+	DescribeCategory(ctx context.Context, categoryID uint64) (*model.Category, error)
 }
 
 type repo struct {
@@ -23,6 +22,6 @@ func NewRepo(db *sqlx.DB, batchSize uint) Repo {
 	return &repo{db: db, batchSize: batchSize}
 }
 
-func (r *repo) DescribeTemplate(ctx context.Context, templateID uint64) (*model.Template, error) {
+func (r *repo) DescribeCategory(ctx context.Context, categoryID uint64) (*model.Category, error) {
 	return nil, nil
 }

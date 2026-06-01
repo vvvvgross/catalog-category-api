@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/vvvvgross/catalog-category-service/internal/config"
+	"github.com/vvvvgross/catalog-category-api/internal/config"
 )
 
 func createMetricsServer(cfg *config.Config) *http.Server {

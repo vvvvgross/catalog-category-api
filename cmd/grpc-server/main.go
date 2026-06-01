@@ -12,10 +12,10 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 
-	"github.com/vvvvgross/catalog-category-service/internal/config"
-	"github.com/vvvvgross/catalog-category-service/internal/database"
-	"github.com/vvvvgross/catalog-category-service/internal/server"
-	"github.com/vvvvgross/catalog-category-service/internal/tracer"
+	"github.com/vvvvgross/catalog-category-api/internal/config"
+	"github.com/vvvvgross/catalog-category-api/internal/database"
+	"github.com/vvvvgross/catalog-category-api/internal/server"
+	"github.com/vvvvgross/catalog-category-api/internal/tracer"
 )
 
 var (

@@ -1,4 +1,4 @@
-module github.com/ozonmp/omp-template-api/pkg/omp-template-api
+module github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api
 
 go 1.25.1
 

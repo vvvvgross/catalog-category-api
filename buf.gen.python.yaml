@@ -1,26 +1,26 @@
 version: v1
 plugins:
   - plugin: python
-    out: pypkg/omp-template-api
+    out: pypkg/catalog-category-api
     strategy: directory
 
   - plugin: mypy
-    out: pypkg/omp-template-api
+    out: pypkg/catalog-category-api
     strategy: directory
 
   - plugin: grpclib_python
-    out: pypkg/omp-template-api
+    out: pypkg/catalog-category-api
     strategy: directory
 
   - plugin: grpc-gateway
-    out: pkg/omp-template-api
+    out: pkg/catalog-category-api
     opt:
       - logtostderr=true
       - paths=import
     strategy: directory
 
   - plugin: validate
-    out: pkg/omp-template-api
+    out: pkg/catalog-category-api
     opt:
       - lang=go
     strategy: directory

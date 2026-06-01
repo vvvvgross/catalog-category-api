@@ -1,8 +1,8 @@
 -- +goose Up
-CREATE TABLE template (
+CREATE TABLE Category (
   id BIGSERIAL PRIMARY KEY,
-  foo BIGINT NOT NULL
+  foo VARCHAR
 );
 
 -- +goose Down
-DROP TABLE template;
+DROP TABLE Category;

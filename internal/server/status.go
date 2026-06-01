@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/rs/zerolog/log"
-	"github.com/vvvvgross/catalog-category-service/internal/config"
+	"github.com/vvvvgross/catalog-category-api/internal/config"
 )
 
 func createStatusServer(cfg *config.Config, isReady *atomic.Value) *http.Server {

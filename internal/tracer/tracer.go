@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/uber/jaeger-client-go"
 
-	"github.com/vvvvgross/catalog-category-service/internal/config"
+	"github.com/vvvvgross/catalog-category-api/internal/config"
 
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 )
