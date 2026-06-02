@@ -34,7 +34,7 @@ func NewCatalogCategoryApiServiceClient(cc grpc.ClientConnInterface) CatalogCate
 
 func (c *catalogCategoryApiServiceClient) CreateCategoryV1(ctx context.Context, in *CreateCategoryV1Request, opts ...grpc.CallOption) (*CreateCategoryV1Response, error) {
 	out := new(CreateCategoryV1Response)
-	err := c.cc.Invoke(ctx, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *catalogCategoryApiServiceClient) CreateCategoryV1(ctx context.Context, 
 
 func (c *catalogCategoryApiServiceClient) DescribeCategoryV1(ctx context.Context, in *DescribeCategoryV1Request, opts ...grpc.CallOption) (*DescribeCategoryV1Response, error) {
 	out := new(DescribeCategoryV1Response)
-	err := c.cc.Invoke(ctx, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *catalogCategoryApiServiceClient) DescribeCategoryV1(ctx context.Context
 
 func (c *catalogCategoryApiServiceClient) ListCategoriesV1(ctx context.Context, in *ListCategoriesV1Request, opts ...grpc.CallOption) (*ListCategoriesV1Response, error) {
 	out := new(ListCategoriesV1Response)
-	err := c.cc.Invoke(ctx, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (c *catalogCategoryApiServiceClient) ListCategoriesV1(ctx context.Context, 
 
 func (c *catalogCategoryApiServiceClient) RemoveCategoryV1(ctx context.Context, in *RemoveCategoryV1Request, opts ...grpc.CallOption) (*RemoveCategoryV1Response, error) {
 	out := new(RemoveCategoryV1Response)
-	err := c.cc.Invoke(ctx, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func _CatalogCategoryApiService_CreateCategoryV1_Handler(srv interface{}, ctx co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1",
+		FullMethod: "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CatalogCategoryApiServiceServer).CreateCategoryV1(ctx, req.(*CreateCategoryV1Request))
@@ -137,7 +137,7 @@ func _CatalogCategoryApiService_DescribeCategoryV1_Handler(srv interface{}, ctx 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1",
+		FullMethod: "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CatalogCategoryApiServiceServer).DescribeCategoryV1(ctx, req.(*DescribeCategoryV1Request))
@@ -155,7 +155,7 @@ func _CatalogCategoryApiService_ListCategoriesV1_Handler(srv interface{}, ctx co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1",
+		FullMethod: "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CatalogCategoryApiServiceServer).ListCategoriesV1(ctx, req.(*ListCategoriesV1Request))
@@ -173,7 +173,7 @@ func _CatalogCategoryApiService_RemoveCategoryV1_Handler(srv interface{}, ctx co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1",
+		FullMethod: "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CatalogCategoryApiServiceServer).RemoveCategoryV1(ctx, req.(*RemoveCategoryV1Request))
@@ -185,7 +185,7 @@ func _CatalogCategoryApiService_RemoveCategoryV1_Handler(srv interface{}, ctx co
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CatalogCategoryApiService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ozonmp.catalog_category_api.v1.CatalogCategoryApiService",
+	ServiceName: "vvvvgross.catalog_category_api.v1.CatalogCategoryApiService",
 	HandlerType: (*CatalogCategoryApiServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

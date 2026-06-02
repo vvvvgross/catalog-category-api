@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ozonmp.catalog_category_api.v1;
+package vvvvgross.catalog_category_api.v1;
 
 import "validate/validate.proto";
 import "google/api/annotations.proto";

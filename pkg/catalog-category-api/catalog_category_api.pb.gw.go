@@ -199,7 +199,7 @@ func RegisterCatalogCategoryApiServiceHandlerServer(ctx context.Context, mux *ru
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", runtime.WithHTTPPathPattern("/v1/categories"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", runtime.WithHTTPPathPattern("/v1/categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -222,7 +222,7 @@ func RegisterCatalogCategoryApiServiceHandlerServer(ctx context.Context, mux *ru
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -245,7 +245,7 @@ func RegisterCatalogCategoryApiServiceHandlerServer(ctx context.Context, mux *ru
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", runtime.WithHTTPPathPattern("/v1/categories"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", runtime.WithHTTPPathPattern("/v1/categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -268,7 +268,7 @@ func RegisterCatalogCategoryApiServiceHandlerServer(ctx context.Context, mux *ru
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -330,7 +330,7 @@ func RegisterCatalogCategoryApiServiceHandlerClient(ctx context.Context, mux *ru
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", runtime.WithHTTPPathPattern("/v1/categories"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/CreateCategoryV1", runtime.WithHTTPPathPattern("/v1/categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -350,7 +350,7 @@ func RegisterCatalogCategoryApiServiceHandlerClient(ctx context.Context, mux *ru
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/DescribeCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -370,7 +370,7 @@ func RegisterCatalogCategoryApiServiceHandlerClient(ctx context.Context, mux *ru
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", runtime.WithHTTPPathPattern("/v1/categories"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/ListCategoriesV1", runtime.WithHTTPPathPattern("/v1/categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -390,7 +390,7 @@ func RegisterCatalogCategoryApiServiceHandlerClient(ctx context.Context, mux *ru
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ozonmp.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", runtime.WithHTTPPathPattern("/v1/categories/{category_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
