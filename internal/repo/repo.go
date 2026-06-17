@@ -27,8 +27,17 @@ type repo struct {
 	batchSize uint
 }
 
+type eventRepo struct {
+	db        *sqlx.DB
+	batchSize uint
+}
+
 func NewRepo(db *sqlx.DB, batchSize uint) Repo {
 	return &repo{db: db, batchSize: batchSize}
+}
+
+func NewEventRepo(db *sqlx.DB, batchSize uint) EventRepo {
+	return &eventRepo{db: db, batchSize: batchSize}
 }
 
 var psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
