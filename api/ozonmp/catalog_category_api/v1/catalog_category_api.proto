@@ -52,7 +52,10 @@ message DescribeCategoryV1Response {
   Category value = 1;
 }
 
-message ListCategoriesV1Request {}
+message ListCategoriesV1Request {
+  uint64 limit = 1;
+  uint64 cursor = 2;
+}
 
 message ListCategoriesV1Response {
   repeated Category items = 1;

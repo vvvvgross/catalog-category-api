@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -9,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/vvvvgross/catalog-category-api/internal/model"
 	"github.com/vvvvgross/catalog-category-api/internal/repo"
 
 	pb "github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api"
@@ -36,14 +39,26 @@ func (c *categoryAPI) CreateCategoryV1(
 	ctx context.Context,
 	req *pb.CreateCategoryV1Request,
 ) (*pb.CreateCategoryV1Response, error) {
-	log.Debug().Str("foo", req.GetFoo()).Msg("CreateCategoryV1 called")
+	log.Debug().Str("foo", req.GetFoo()).
+		Msg("CreateCategoryV1 called")
 
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return nil, status.Error(codes.Internal, "Not implemented")
+	category := &model.Category{
+		Foo: req.GetFoo(),
+	}
+
+	categoryID, err := c.repo.Add(ctx, category)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.CreateCategoryV1Response{
+		CategoryId: categoryID,
+	}, nil
 }
 
 func (c *categoryAPI) DescribeCategoryV1(
@@ -57,7 +72,16 @@ func (c *categoryAPI) DescribeCategoryV1(
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return nil, status.Error(codes.Internal, "Not implemented")
+	category, err := c.repo.Get(ctx, req.GetCategoryId())
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Error(codes.NotFound, err.Error())
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.DescribeCategoryV1Response{
+		Value: categoryToProto(*category),
+	}, nil
 }
 
 func (c *categoryAPI) ListCategoriesV1(
@@ -66,7 +90,20 @@ func (c *categoryAPI) ListCategoriesV1(
 ) (*pb.ListCategoriesV1Response, error) {
 	log.Debug().Msg("ListCategoriesV1 called")
 
-	return nil, status.Error(codes.Internal, "Not implemented")
+	categories, err := c.repo.List(ctx, req.GetLimit(), req.GetCursor())
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	items := make([]*pb.Category, 0, len(categories))
+	for _, category := range categories {
+		items = append(items, categoryToProto(category))
+	}
+
+	return &pb.ListCategoriesV1Response{
+		Items: items,
+	}, nil
 }
 
 func (c *categoryAPI) RemoveCategoryV1(
@@ -80,5 +117,19 @@ func (c *categoryAPI) RemoveCategoryV1(
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return nil, status.Error(codes.Internal, "Not implemented")
+	flag, err := c.repo.Remove(ctx, req.GetCategoryId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.RemoveCategoryV1Response{
+		Found: flag,
+	}, nil
+}
+
+func categoryToProto(category model.Category) *pb.Category {
+	return &pb.Category{
+		Id:  category.ID,
+		Foo: category.Foo,
+	}
 }

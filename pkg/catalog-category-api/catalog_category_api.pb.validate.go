@@ -403,6 +403,10 @@ func (m *ListCategoriesV1Request) Validate() error {
 		return nil
 	}
 
+	// no validation rules for Limit
+
+	// no validation rules for Cursor
+
 	return nil
 }
 
