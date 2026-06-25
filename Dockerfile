@@ -2,7 +2,7 @@
 
 ARG GITHUB_PATH=github.com/vvvvgross/catalog-category-api
 
-FROM golang:1.16-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /home/${GITHUB_PATH}
 
