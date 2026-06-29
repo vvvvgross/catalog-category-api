@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -14,6 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	pb "github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api"
 )
 
@@ -41,7 +43,16 @@ func createGatewayServer(grpcAddr, gatewayAddr string) *http.Server {
 		log.Fatal().Err(err).Msg("Failed to dial server")
 	}
 
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+			if strings.EqualFold(key, applog.HeaderLogLevel) {
+				return applog.HeaderLogLevel, true
+			}
+
+			return runtime.DefaultHeaderMatcher(key)
+		}),
+	)
+
 	if err := pb.RegisterCatalogCategoryApiServiceHandler(context.Background(), mux, conn); err != nil {
 		log.Fatal().Err(err).Msg("Failed registration handler")
 	}

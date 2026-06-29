@@ -28,6 +28,14 @@ func main() {
 	}
 	cfg := config.GetConfigInstance()
 
+	defaultLogLevel := zerolog.InfoLevel
+	if cfg.Project.Debug {
+		defaultLogLevel = zerolog.DebugLevel
+	}
+
+	zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	log.Logger = log.Logger.Level(defaultLogLevel)
+
 	migration := flag.Bool("migration", true, "Defines the migration start option")
 	flag.Parse()
 
@@ -36,13 +44,8 @@ func main() {
 		Str("commitHash", cfg.Project.CommitHash).
 		Bool("debug", cfg.Project.Debug).
 		Str("environment", cfg.Project.Environment).
+		Str("default_log_level", defaultLogLevel.String()).
 		Msgf("Starting service: %s", cfg.Project.Name)
-
-	if cfg.Project.Debug {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	}
 
 	dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v dbname=%v sslmode=%v",
 		cfg.Database.Host,

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/vvvvgross/catalog-category-api/internal/api"
 	"github.com/vvvvgross/catalog-category-api/internal/config"
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	"github.com/vvvvgross/catalog-category-api/internal/repo"
 	pb "github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api"
 )
@@ -92,6 +94,11 @@ func (s *GrpcServer) Start(cfg *config.Config) error {
 	}
 	defer l.Close()
 
+	defaultLogLevel := zerolog.InfoLevel
+	if cfg.Project.Debug {
+		defaultLogLevel = zerolog.DebugLevel
+	}
+
 	grpcServer := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{
 			MaxConnectionIdle: time.Duration(cfg.Grpc.MaxConnectionIdle) * time.Minute,
@@ -101,6 +108,7 @@ func (s *GrpcServer) Start(cfg *config.Config) error {
 		}),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
+			applog.UnaryLogLevelInterceptor(defaultLogLevel),
 			grpc_prometheus.UnaryServerInterceptor,
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpcrecovery.UnaryServerInterceptor(),
