@@ -9,6 +9,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 )
 
@@ -51,8 +52,20 @@ func NewEventRepo(db *sqlx.DB, batchSize uint) EventRepo {
 var psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error) {
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Add").
+		Str("foo", category.Foo).
+		Msg("adding category")
+
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Msg("failed to begin transaction")
+
 		return 0, err
 	}
 	defer tx.Rollback()
@@ -64,11 +77,24 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Msg("failed to build insert category query")
+
 		return 0, err
 	}
 
 	err = tx.QueryRowContext(ctx, sqlStr, args...).Scan(&category.ID)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Str("foo", category.Foo).
+			Msg("failed to insert category")
+
 		return 0, err
 	}
 
@@ -79,6 +105,13 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Str("foo", category.Foo).
+			Msg("failed to marshal category event payload")
+
 		return 0, err
 	}
 
@@ -88,23 +121,59 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Uint64("category_id", category.ID).
+			Msg("failed to build insert category event query")
+
 		return 0, err
 	}
 
 	_, err = tx.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Uint64("category_id", category.ID).
+			Str("event_type", string(model.CategoryEventTypeCreated)).
+			Msg("failed to insert category event")
+
 		return 0, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Add").
+			Uint64("category_id", category.ID).
+			Str("event_type", string(model.CategoryEventTypeCreated)).
+			Msg("failed to commit transaction")
+
 		return 0, err
 	}
+
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Add").
+		Uint64("category_id", category.ID).
+		Str("event_type", string(model.CategoryEventTypeCreated)).
+		Msg("category added")
 
 	return category.ID, nil
 }
 
 func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, error) {
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Get").
+		Uint64("category_id", categoryID).
+		Msg("getting category")
+
 	sqlStr, args, err := psql.Select("id", "foo", "removed", "created", "updated").
 		From("categories").
 		Where(sq.Eq{
@@ -114,20 +183,58 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Get").
+			Uint64("category_id", categoryID).
+			Msg("failed to build get category query")
+
 		return nil, err
 	}
 
 	var category model.Category
 	err = r.db.GetContext(ctx, &category, sqlStr, args...)
 
-	if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		log.Debug().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Get").
+			Uint64("category_id", categoryID).
+			Msg("category not found")
+
 		return nil, err
 	}
+
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Get").
+			Uint64("category_id", categoryID).
+			Msg("failed to get category")
+
+		return nil, err
+	}
+
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Get").
+		Uint64("category_id", category.ID).
+		Msg("category found")
 
 	return &category, nil
 }
 
 func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.Category, error) {
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "List").
+		Uint64("limit", limit).
+		Uint64("cursor", cursor).
+		Msg("listing categories")
+
 	sqlStr, args, err := psql.Select("id", "foo", "removed", "created", "updated").
 		From("categories").
 		Where(sq.Eq{"removed": false}).
@@ -137,6 +244,14 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "List").
+			Uint64("limit", limit).
+			Uint64("cursor", cursor).
+			Msg("failed to build list categories query")
+
 		return nil, err
 	}
 
@@ -144,15 +259,44 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 	err = r.db.SelectContext(ctx, &categories, sqlStr, args...)
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "List").
+			Uint64("limit", limit).
+			Uint64("cursor", cursor).
+			Msg("failed build listing categories request")
+
 		return nil, err
 	}
+
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "List").
+		Uint64("limit", limit).
+		Uint64("cursor", cursor).
+		Int("items_count", len(categories)).
+		Msg("categories listed")
 
 	return categories, nil
 }
 
 func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Remove").
+		Uint64("category_id", categoryID).
+		Msg("removing category")
+
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to begin transaction")
+
 		return false, err
 	}
 	defer tx.Rollback()
@@ -166,6 +310,13 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to build remove category query")
+
 		return false, err
 	}
 
@@ -174,8 +325,22 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 	var returnFOO string
 	err = result.Scan(&returnID, &returnFOO)
 	if errors.Is(err, sql.ErrNoRows) {
+		log.Debug().
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Bool("found", false).
+			Msg("category not found")
+
 		return false, nil
 	} else if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to remove category")
+
 		return false, err
 	}
 
@@ -186,6 +351,13 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to marshal category event payload")
+
 		return false, err
 	}
 
@@ -195,18 +367,47 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 		ToSql()
 
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to build insert category event query")
+
 		return false, err
 	}
 
 	_, err = tx.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to insert category event")
+
 		return false, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Remove").
+			Uint64("category_id", categoryID).
+			Msg("failed to commit transaction")
+
 		return false, err
 	}
+
+	log.Debug().
+		Str("repo", "category").
+		Str("method", "Remove").
+		Uint64("category_id", returnID).
+		Bool("found", true).
+		Str("event_type", string(model.CategoryEventTypeRemoved)).
+		Msg("category removed")
 
 	return true, nil
 }
