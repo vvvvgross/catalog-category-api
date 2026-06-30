@@ -5,19 +5,22 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/rs/zerolog/log"
+
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 )
 
 func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Lock").
 		Uint64("limit", n).
 		Msg("locking events")
 
 	if n == 0 {
-		log.Debug().
+		logger.Debug().
 			Str("repo", "category_event").
 			Str("method", "Lock").
 			Uint64("limit", n).
@@ -29,7 +32,7 @@ func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, 
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Lock").
@@ -58,7 +61,7 @@ func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, 
 	err = tx.SelectContext(ctx, &events, query, model.CategoryEventStatusPending,
 		n, model.CategoryEventStatusLocked)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Lock").
@@ -71,7 +74,7 @@ func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, 
 
 	err = tx.Commit()
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Lock").
@@ -82,7 +85,7 @@ func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, 
 		return nil, err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Lock").
 		Uint64("limit", n).
@@ -93,14 +96,16 @@ func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, 
 }
 
 func (r *eventRepo) Unlock(ctx context.Context, eventIDs []uint64) error {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Unlock").
 		Int("event_ids_count", len(eventIDs)).
 		Msg("unlocking events")
 
 	if len(eventIDs) == 0 {
-		log.Debug().
+		logger.Debug().
 			Str("repo", "category_event").
 			Str("method", "Unlock").
 			Int("events_count", 0).
@@ -119,7 +124,7 @@ func (r *eventRepo) Unlock(ctx context.Context, eventIDs []uint64) error {
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Unlock").
@@ -132,7 +137,7 @@ func (r *eventRepo) Unlock(ctx context.Context, eventIDs []uint64) error {
 	_, err = r.db.ExecContext(ctx, sqlStr, args...)
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Unlock").
@@ -142,7 +147,7 @@ func (r *eventRepo) Unlock(ctx context.Context, eventIDs []uint64) error {
 		return err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Unlock").
 		Int("event_ids_count", len(eventIDs)).
@@ -152,14 +157,16 @@ func (r *eventRepo) Unlock(ctx context.Context, eventIDs []uint64) error {
 }
 
 func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Remove").
 		Int("event_ids_count", len(eventIDs)).
 		Msg("removing events")
 
 	if len(eventIDs) == 0 {
-		log.Debug().
+		logger.Debug().
 			Str("repo", "category_event").
 			Str("method", "Remove").
 			Int("events_count", 0).
@@ -173,7 +180,7 @@ func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error)
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Remove").
@@ -185,7 +192,7 @@ func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error)
 
 	result, err := r.db.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Remove").
@@ -197,7 +204,7 @@ func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error)
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category_event").
 			Str("method", "Remove").
@@ -209,7 +216,7 @@ func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error)
 
 	removed := rowsAffected > 0
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category_event").
 		Str("method", "Remove").
 		Int("event_ids_count", len(eventIDs)).

@@ -9,7 +9,8 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/rs/zerolog/log"
+
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 )
 
@@ -52,7 +53,9 @@ func NewEventRepo(db *sqlx.DB, batchSize uint) EventRepo {
 var psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Add").
 		Str("foo", category.Foo).
@@ -60,7 +63,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -77,7 +80,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -88,7 +91,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	err = tx.QueryRowContext(ctx, sqlStr, args...).Scan(&category.ID)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -105,7 +108,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -121,7 +124,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -133,7 +136,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	_, err = tx.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -146,7 +149,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 
 	err = tx.Commit()
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Add").
@@ -157,7 +160,7 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 		return 0, err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Add").
 		Uint64("category_id", category.ID).
@@ -168,7 +171,9 @@ func (r *repo) Add(ctx context.Context, category *model.Category) (uint64, error
 }
 
 func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Get").
 		Uint64("category_id", categoryID).
@@ -183,7 +188,7 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Get").
@@ -197,7 +202,7 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 	err = r.db.GetContext(ctx, &category, sqlStr, args...)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		log.Debug().
+		logger.Debug().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Get").
@@ -208,7 +213,7 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 	}
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Get").
@@ -218,7 +223,7 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 		return nil, err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Get").
 		Uint64("category_id", category.ID).
@@ -228,7 +233,9 @@ func (r *repo) Get(ctx context.Context, categoryID uint64) (*model.Category, err
 }
 
 func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.Category, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "List").
 		Uint64("limit", limit).
@@ -244,7 +251,7 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "List").
@@ -259,7 +266,7 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 	err = r.db.SelectContext(ctx, &categories, sqlStr, args...)
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "List").
@@ -270,7 +277,7 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 		return nil, err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "List").
 		Uint64("limit", limit).
@@ -282,7 +289,9 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 }
 
 func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Remove").
 		Uint64("category_id", categoryID).
@@ -290,7 +299,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -310,7 +319,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -325,7 +334,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 	var returnFOO string
 	err = result.Scan(&returnID, &returnFOO)
 	if errors.Is(err, sql.ErrNoRows) {
-		log.Debug().
+		logger.Debug().
 			Str("repo", "category").
 			Str("method", "Remove").
 			Uint64("category_id", categoryID).
@@ -334,7 +343,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 		return false, nil
 	} else if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -351,7 +360,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -367,7 +376,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 		ToSql()
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -379,7 +388,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 	_, err = tx.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -391,7 +400,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 
 	err = tx.Commit()
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("repo", "category").
 			Str("method", "Remove").
@@ -401,7 +410,7 @@ func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {
 		return false, err
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("repo", "category").
 		Str("method", "Remove").
 		Uint64("category_id", returnID).

@@ -7,13 +7,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 	"github.com/vvvvgross/catalog-category-api/internal/repo"
 
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	pb "github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api"
 )
 
@@ -39,14 +39,16 @@ func (c *categoryAPI) CreateCategoryV1(
 	ctx context.Context,
 	req *pb.CreateCategoryV1Request,
 ) (*pb.CreateCategoryV1Response, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("handler", "CreateCategoryV1").
 		Str("foo", req.GetFoo()).
 		Msg("CreateCategoryV1 called")
 
 	err := req.Validate()
 	if err != nil {
-		log.Warn().
+		logger.Warn().
 			Err(err).
 			Str("handler", "CreateCategoryV1").
 			Msg("validation failed")
@@ -60,7 +62,7 @@ func (c *categoryAPI) CreateCategoryV1(
 
 	categoryID, err := c.repo.Add(ctx, category)
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("handler", "CreateCategoryV1").
 			Str("foo", req.GetFoo()).
@@ -69,7 +71,7 @@ func (c *categoryAPI) CreateCategoryV1(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("handler", "CreateCategoryV1").
 		Uint64("category_id", categoryID).
 		Msg("category created")
@@ -83,14 +85,16 @@ func (c *categoryAPI) DescribeCategoryV1(
 	ctx context.Context,
 	req *pb.DescribeCategoryV1Request,
 ) (*pb.DescribeCategoryV1Response, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("handler", "DescribeCategoryV1").
 		Uint64("category_id", req.GetCategoryId()).
 		Msg("DescribeCategoryV1 called")
 
 	err := req.Validate()
 	if err != nil {
-		log.Warn().
+		logger.Warn().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
 			Msg("validation failed")
@@ -100,7 +104,7 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 	category, err := c.repo.Get(ctx, req.GetCategoryId())
 	if errors.Is(err, sql.ErrNoRows) {
-		log.Warn().
+		logger.Warn().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
@@ -110,7 +114,7 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 		return nil, status.Error(codes.NotFound, err.Error())
 	} else if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
@@ -119,7 +123,7 @@ func (c *categoryAPI) DescribeCategoryV1(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("handler", "DescribeCategoryV1").
 		Uint64("category_id", req.GetCategoryId()).
 		Str("foo", category.Foo).
@@ -134,7 +138,9 @@ func (c *categoryAPI) ListCategoriesV1(
 	ctx context.Context,
 	req *pb.ListCategoriesV1Request,
 ) (*pb.ListCategoriesV1Response, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("handler", "ListCategoriesV1").
 		Uint64("limit", req.GetLimit()).
 		Uint64("cursor", req.GetCursor()).
@@ -143,7 +149,7 @@ func (c *categoryAPI) ListCategoriesV1(
 	categories, err := c.repo.List(ctx, req.GetLimit(), req.GetCursor())
 
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("handler", "ListCategoriesV1").
 			Msg("failed to list categories")
@@ -156,7 +162,7 @@ func (c *categoryAPI) ListCategoriesV1(
 		items = append(items, categoryToProto(category))
 	}
 
-	log.Debug().
+	logger.Debug().
 		Str("handler", "ListCategoriesV1").
 		Uint64("limit", req.GetLimit()).
 		Uint64("cursor", req.GetCursor()).
@@ -172,14 +178,16 @@ func (c *categoryAPI) RemoveCategoryV1(
 	ctx context.Context,
 	req *pb.RemoveCategoryV1Request,
 ) (*pb.RemoveCategoryV1Response, error) {
-	log.Debug().
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
 		Str("handler", "RemoveCategoryV1").
 		Uint64("category_id", req.GetCategoryId()).
 		Msg("RemoveCategoryV1 called")
 
 	err := req.Validate()
 	if err != nil {
-		log.Warn().
+		logger.Warn().
 			Err(err).
 			Str("handler", "RemoveCategoryV1").
 			Msg("validation failed")
@@ -189,7 +197,7 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 	flag, err := c.repo.Remove(ctx, req.GetCategoryId())
 	if err != nil {
-		log.Error().
+		logger.Error().
 			Err(err).
 			Str("handler", "RemoveCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
@@ -199,7 +207,7 @@ func (c *categoryAPI) RemoveCategoryV1(
 	}
 
 	if !flag {
-		log.Warn().
+		logger.Warn().
 			Str("handler", "RemoveCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
 			Bool("found", flag).
@@ -207,7 +215,7 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 		totalCategoryNotFound.Inc()
 	} else {
-		log.Debug().
+		logger.Debug().
 			Str("handler", "RemoveCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
 			Bool("found", flag).
