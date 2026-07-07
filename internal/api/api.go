@@ -5,15 +5,16 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/opentracing/opentracing-go"
+	otlog "github.com/opentracing/opentracing-go/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 	"github.com/vvvvgross/catalog-category-api/internal/repo"
-
-	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	pb "github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api"
 )
 
@@ -39,6 +40,12 @@ func (c *categoryAPI) CreateCategoryV1(
 	ctx context.Context,
 	req *pb.CreateCategoryV1Request,
 ) (*pb.CreateCategoryV1Response, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateCategoryV1")
+	defer span.Finish()
+
+	span.SetTag("handler", "CreateCategoryV1")
+	span.SetTag("foo", req.GetFoo())
+
 	logger := applog.FromContext(ctx)
 
 	logger.Debug().
@@ -48,6 +55,10 @@ func (c *categoryAPI) CreateCategoryV1(
 
 	err := req.Validate()
 	if err != nil {
+		span.SetTag("error", true)
+		span.SetTag("validation_error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Warn().
 			Err(err).
 			Str("handler", "CreateCategoryV1").
@@ -62,6 +73,9 @@ func (c *categoryAPI) CreateCategoryV1(
 
 	categoryID, err := c.repo.Add(ctx, category)
 	if err != nil {
+		span.SetTag("error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Error().
 			Err(err).
 			Str("handler", "CreateCategoryV1").
@@ -70,6 +84,8 @@ func (c *categoryAPI) CreateCategoryV1(
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	span.SetTag("category_id", categoryID)
 
 	logger.Debug().
 		Str("handler", "CreateCategoryV1").
@@ -85,6 +101,12 @@ func (c *categoryAPI) DescribeCategoryV1(
 	ctx context.Context,
 	req *pb.DescribeCategoryV1Request,
 ) (*pb.DescribeCategoryV1Response, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DescribeCategoryV1")
+	defer span.Finish()
+
+	span.SetTag("handler", "DescribeCategoryV1")
+	span.SetTag("category_id", req.GetCategoryId())
+
 	logger := applog.FromContext(ctx)
 
 	logger.Debug().
@@ -94,6 +116,10 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 	err := req.Validate()
 	if err != nil {
+		span.SetTag("error", true)
+		span.SetTag("validation_error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Warn().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
@@ -104,6 +130,9 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 	category, err := c.repo.Get(ctx, req.GetCategoryId())
 	if errors.Is(err, sql.ErrNoRows) {
+		span.SetTag("not_found", true)
+		span.LogFields(otlog.String("event", "category not found"))
+
 		logger.Warn().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
@@ -114,6 +143,9 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 		return nil, status.Error(codes.NotFound, err.Error())
 	} else if err != nil {
+		span.SetTag("error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Error().
 			Err(err).
 			Str("handler", "DescribeCategoryV1").
@@ -122,6 +154,8 @@ func (c *categoryAPI) DescribeCategoryV1(
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	span.SetTag("found", true)
 
 	logger.Debug().
 		Str("handler", "DescribeCategoryV1").
@@ -138,6 +172,13 @@ func (c *categoryAPI) ListCategoriesV1(
 	ctx context.Context,
 	req *pb.ListCategoriesV1Request,
 ) (*pb.ListCategoriesV1Response, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "ListCategoriesV1")
+	defer span.Finish()
+
+	span.SetTag("handler", "ListCategoriesV1")
+	span.SetTag("limit", req.GetLimit())
+	span.SetTag("cursor", req.GetCursor())
+
 	logger := applog.FromContext(ctx)
 
 	logger.Debug().
@@ -149,6 +190,9 @@ func (c *categoryAPI) ListCategoriesV1(
 	categories, err := c.repo.List(ctx, req.GetLimit(), req.GetCursor())
 
 	if err != nil {
+		span.SetTag("error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Error().
 			Err(err).
 			Str("handler", "ListCategoriesV1").
@@ -156,6 +200,8 @@ func (c *categoryAPI) ListCategoriesV1(
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	span.SetTag("categories_count", len(categories))
 
 	items := make([]*pb.Category, 0, len(categories))
 	for _, category := range categories {
@@ -178,6 +224,12 @@ func (c *categoryAPI) RemoveCategoryV1(
 	ctx context.Context,
 	req *pb.RemoveCategoryV1Request,
 ) (*pb.RemoveCategoryV1Response, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "RemoveCategoryV1")
+	defer span.Finish()
+
+	span.SetTag("handler", "RemoveCategoryV1")
+	span.SetTag("category_id", req.GetCategoryId())
+
 	logger := applog.FromContext(ctx)
 
 	logger.Debug().
@@ -187,6 +239,10 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 	err := req.Validate()
 	if err != nil {
+		span.SetTag("error", true)
+		span.SetTag("validation_error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Warn().
 			Err(err).
 			Str("handler", "RemoveCategoryV1").
@@ -197,6 +253,9 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 	flag, err := c.repo.Remove(ctx, req.GetCategoryId())
 	if err != nil {
+		span.SetTag("error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
 		logger.Error().
 			Err(err).
 			Str("handler", "RemoveCategoryV1").
@@ -207,6 +266,9 @@ func (c *categoryAPI) RemoveCategoryV1(
 	}
 
 	if !flag {
+		span.SetTag("not_found", true)
+		span.LogFields(otlog.String("event", "category not found"))
+
 		logger.Warn().
 			Str("handler", "RemoveCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).
@@ -215,6 +277,8 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 		totalCategoryNotFound.Inc()
 	} else {
+		span.SetTag("removed", true)
+
 		logger.Debug().
 			Str("handler", "RemoveCategoryV1").
 			Uint64("category_id", req.GetCategoryId()).

@@ -21,8 +21,8 @@ func NewTracer(cfg *config.Config) (io.Closer, error) {
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:           true,
-			LocalAgentHostPort: cfg.Jaeger.Host + cfg.Jaeger.Port,
+			LogSpans:          true,
+			CollectorEndpoint: "http://" + cfg.Jaeger.Host + ":14268/api/traces",
 		},
 	}
 	tracer, closer, err := cfgTracer.NewTracer(jaegercfg.Logger(jaeger.StdLogger))

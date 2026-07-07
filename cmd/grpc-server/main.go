@@ -72,7 +72,7 @@ func main() {
 
 	tracing, err := tracer.NewTracer(&cfg)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed init tracing")
+		log.Fatal().Err(err).Msg("Failed init tracing")
 
 		return
 	}
