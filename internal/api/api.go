@@ -23,6 +23,14 @@ var (
 		Name: "catalog_category_api_category_not_found_total",
 		Help: "Total number of categories that were not found",
 	})
+
+	totalCategoryCUDEvents = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "catalog_category_api_category_cud_events_total",
+			Help: "Total number of category CUD events",
+		},
+		[]string{"operation"},
+	)
 )
 
 type categoryAPI struct {
@@ -86,6 +94,7 @@ func (c *categoryAPI) CreateCategoryV1(
 	}
 
 	span.SetTag("category_id", categoryID)
+	totalCategoryCUDEvents.WithLabelValues("create").Inc()
 
 	logger.Debug().
 		Str("handler", "CreateCategoryV1").
@@ -277,6 +286,7 @@ func (c *categoryAPI) RemoveCategoryV1(
 
 		totalCategoryNotFound.Inc()
 	} else {
+		totalCategoryCUDEvents.WithLabelValues("delete").Inc()
 		span.SetTag("removed", true)
 
 		logger.Debug().
