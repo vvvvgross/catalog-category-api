@@ -5,10 +5,17 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	applog "github.com/vvvvgross/catalog-category-api/internal/logger"
 	"github.com/vvvvgross/catalog-category-api/internal/model"
 )
+
+var totalProcessedRetranslatorEvents = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "catalog_category_api_retranslator_processed_events_total",
+	Help: "Total number of processed retranslator events",
+})
 
 func (r *eventRepo) Lock(ctx context.Context, n uint64) ([]model.CategoryEvent, error) {
 	logger := applog.FromContext(ctx)
@@ -215,6 +222,10 @@ func (r *eventRepo) Remove(ctx context.Context, eventIDs []uint64) (bool, error)
 	}
 
 	removed := rowsAffected > 0
+
+	if rowsAffected > 0 {
+		totalProcessedRetranslatorEvents.Add(float64(rowsAffected))
+	}
 
 	logger.Debug().
 		Str("repo", "category_event").
