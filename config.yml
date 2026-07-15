@@ -43,8 +43,10 @@ database:
 
 kafka:
   capacity: 512
-  topic: "catalog-category-events"
-  groupId: "catalog-category-api"
+  groupId: "catalog-category-facade"
   brokers:
     - "kafka:9092"
-    - "localhost:9094"
+  topics:
+    created: "catalog.category.created"
+    updated: "catalog.category.updated"
+    removed: "catalog.category.removed"
