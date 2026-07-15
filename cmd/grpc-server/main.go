@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog"
@@ -14,6 +16,9 @@ import (
 
 	"github.com/vvvvgross/catalog-category-api/internal/config"
 	"github.com/vvvvgross/catalog-category-api/internal/database"
+	kafkaproducer "github.com/vvvvgross/catalog-category-api/internal/kafka"
+	"github.com/vvvvgross/catalog-category-api/internal/repo"
+	"github.com/vvvvgross/catalog-category-api/internal/retranslator"
 	"github.com/vvvvgross/catalog-category-api/internal/server"
 	"github.com/vvvvgross/catalog-category-api/internal/tracer"
 )
@@ -77,6 +82,27 @@ func main() {
 		return
 	}
 	defer tracing.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	producer := kafkaproducer.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topics)
+	defer func() {
+		if err = producer.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close kafka producer")
+		}
+	}()
+
+	eventsRepo := repo.NewEventRepo(db, uint(cfg.Kafka.Capacity))
+
+	categoryRetranslator := retranslator.New(
+		eventsRepo,
+		producer,
+		cfg.Kafka.Capacity,
+		2*time.Second,
+	)
+
+	go categoryRetranslator.Run(ctx)
 
 	if err := server.NewGrpcServer(db, batchSize).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")
