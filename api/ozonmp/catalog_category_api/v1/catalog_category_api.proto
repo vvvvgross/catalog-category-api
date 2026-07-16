@@ -24,6 +24,12 @@ service CatalogCategoryApiService {
       get: "/v1/categories"
     };
   }
+  rpc UpdateCategoryV1(UpdateCategoryV1Request) returns (UpdateCategoryV1Response) {
+    option (google.api.http) = {
+      patch: "/v1/categories/{category_id}"
+      body: "*"
+    };
+  }
   rpc RemoveCategoryV1(RemoveCategoryV1Request) returns (RemoveCategoryV1Response) {
     option (google.api.http) = {
       delete: "/v1/categories/{category_id}"
@@ -59,6 +65,15 @@ message ListCategoriesV1Request {
 
 message ListCategoriesV1Response {
   repeated Category items = 1;
+}
+
+message UpdateCategoryV1Request {
+  uint64 category_id = 1 [(validate.rules).uint64.gt = 0];
+  string foo = 2 [(validate.rules).string = {min_len: 1, max_len: 255}];
+}
+
+message UpdateCategoryV1Response {
+  bool found = 1;
 }
 
 message RemoveCategoryV1Request {

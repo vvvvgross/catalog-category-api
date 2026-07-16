@@ -18,6 +18,7 @@ type Repo interface {
 	Add(ctx context.Context, category *model.Category) (uint64, error)
 	Get(ctx context.Context, categoryID uint64) (*model.Category, error)
 	List(ctx context.Context, limit uint64, cursor uint64) ([]model.Category, error)
+	Update(ctx context.Context, categoryID uint64, foo string) (bool, error)
 	Remove(ctx context.Context, categoryID uint64) (bool, error)
 }
 
@@ -286,6 +287,140 @@ func (r *repo) List(ctx context.Context, limit uint64, cursor uint64) ([]model.C
 		Msg("categories listed")
 
 	return categories, nil
+}
+
+func (r *repo) Update(ctx context.Context, categoryID uint64, foo string) (bool, error) {
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
+		Str("repo", "category").
+		Str("method", "Update").
+		Uint64("category_id", categoryID).
+		Str("foo", foo).
+		Msg("updating category")
+
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to begin transaction")
+
+		return false, err
+	}
+	defer tx.Rollback()
+
+	sqlStr, args, err := psql.Update("categories").
+		Set("updated", time.Now()).
+		Set("foo", foo).
+		Where(sq.Eq{"id": categoryID}).
+		Where(sq.Eq{"removed": false}).
+		Suffix("RETURNING id, foo").
+		ToSql()
+
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to build update category query")
+
+		return false, err
+	}
+
+	result := tx.QueryRowContext(ctx, sqlStr, args...)
+	var returnID uint64
+	var returnFOO string
+	err = result.Scan(&returnID, &returnFOO)
+	if errors.Is(err, sql.ErrNoRows) {
+		logger.Debug().
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Bool("found", false).
+			Msg("category not found")
+
+		return false, nil
+	} else if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to update category")
+
+		return false, err
+	}
+
+	payload := categoryPayload{
+		CategoryID: returnID,
+		Foo:        returnFOO,
+	}
+
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to marshal category event payload")
+
+		return false, err
+	}
+
+	sqlStr, args, err = psql.Insert("categories_events").
+		Columns("category_id", "type", "status", "payload").
+		Values(returnID, model.CategoryEventTypeUpdated, model.CategoryEventStatusPending, jsonBytes).
+		ToSql()
+
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to build insert category event query")
+
+		return false, err
+	}
+
+	_, err = tx.ExecContext(ctx, sqlStr, args...)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to insert category event")
+
+		return false, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Str("repo", "category").
+			Str("method", "Update").
+			Uint64("category_id", categoryID).
+			Msg("failed to commit transaction")
+
+		return false, err
+	}
+
+	logger.Debug().
+		Str("repo", "category").
+		Str("method", "Update").
+		Uint64("category_id", returnID).
+		Bool("found", true).
+		Str("event_type", string(model.CategoryEventTypeUpdated)).
+		Msg("category updated")
+
+	return true, nil
 }
 
 func (r *repo) Remove(ctx context.Context, categoryID uint64) (bool, error) {

@@ -21,6 +21,7 @@ type CatalogCategoryApiServiceClient interface {
 	CreateCategoryV1(ctx context.Context, in *CreateCategoryV1Request, opts ...grpc.CallOption) (*CreateCategoryV1Response, error)
 	DescribeCategoryV1(ctx context.Context, in *DescribeCategoryV1Request, opts ...grpc.CallOption) (*DescribeCategoryV1Response, error)
 	ListCategoriesV1(ctx context.Context, in *ListCategoriesV1Request, opts ...grpc.CallOption) (*ListCategoriesV1Response, error)
+	UpdateCategoryV1(ctx context.Context, in *UpdateCategoryV1Request, opts ...grpc.CallOption) (*UpdateCategoryV1Response, error)
 	RemoveCategoryV1(ctx context.Context, in *RemoveCategoryV1Request, opts ...grpc.CallOption) (*RemoveCategoryV1Response, error)
 }
 
@@ -59,6 +60,15 @@ func (c *catalogCategoryApiServiceClient) ListCategoriesV1(ctx context.Context, 
 	return out, nil
 }
 
+func (c *catalogCategoryApiServiceClient) UpdateCategoryV1(ctx context.Context, in *UpdateCategoryV1Request, opts ...grpc.CallOption) (*UpdateCategoryV1Response, error) {
+	out := new(UpdateCategoryV1Response)
+	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/UpdateCategoryV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *catalogCategoryApiServiceClient) RemoveCategoryV1(ctx context.Context, in *RemoveCategoryV1Request, opts ...grpc.CallOption) (*RemoveCategoryV1Response, error) {
 	out := new(RemoveCategoryV1Response)
 	err := c.cc.Invoke(ctx, "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/RemoveCategoryV1", in, out, opts...)
@@ -75,6 +85,7 @@ type CatalogCategoryApiServiceServer interface {
 	CreateCategoryV1(context.Context, *CreateCategoryV1Request) (*CreateCategoryV1Response, error)
 	DescribeCategoryV1(context.Context, *DescribeCategoryV1Request) (*DescribeCategoryV1Response, error)
 	ListCategoriesV1(context.Context, *ListCategoriesV1Request) (*ListCategoriesV1Response, error)
+	UpdateCategoryV1(context.Context, *UpdateCategoryV1Request) (*UpdateCategoryV1Response, error)
 	RemoveCategoryV1(context.Context, *RemoveCategoryV1Request) (*RemoveCategoryV1Response, error)
 	mustEmbedUnimplementedCatalogCategoryApiServiceServer()
 }
@@ -91,6 +102,9 @@ func (UnimplementedCatalogCategoryApiServiceServer) DescribeCategoryV1(context.C
 }
 func (UnimplementedCatalogCategoryApiServiceServer) ListCategoriesV1(context.Context, *ListCategoriesV1Request) (*ListCategoriesV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCategoriesV1 not implemented")
+}
+func (UnimplementedCatalogCategoryApiServiceServer) UpdateCategoryV1(context.Context, *UpdateCategoryV1Request) (*UpdateCategoryV1Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCategoryV1 not implemented")
 }
 func (UnimplementedCatalogCategoryApiServiceServer) RemoveCategoryV1(context.Context, *RemoveCategoryV1Request) (*RemoveCategoryV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveCategoryV1 not implemented")
@@ -163,6 +177,24 @@ func _CatalogCategoryApiService_ListCategoriesV1_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogCategoryApiService_UpdateCategoryV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCategoryV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogCategoryApiServiceServer).UpdateCategoryV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vvvvgross.catalog_category_api.v1.CatalogCategoryApiService/UpdateCategoryV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogCategoryApiServiceServer).UpdateCategoryV1(ctx, req.(*UpdateCategoryV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CatalogCategoryApiService_RemoveCategoryV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveCategoryV1Request)
 	if err := dec(in); err != nil {
@@ -199,6 +231,10 @@ var CatalogCategoryApiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCategoriesV1",
 			Handler:    _CatalogCategoryApiService_ListCategoriesV1_Handler,
+		},
+		{
+			MethodName: "UpdateCategoryV1",
+			Handler:    _CatalogCategoryApiService_UpdateCategoryV1_Handler,
 		},
 		{
 			MethodName: "RemoveCategoryV1",

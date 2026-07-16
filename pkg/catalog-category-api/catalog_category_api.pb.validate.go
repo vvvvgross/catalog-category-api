@@ -548,6 +548,156 @@ var _ interface {
 	ErrorName() string
 } = ListCategoriesV1ResponseValidationError{}
 
+// Validate checks the field values on UpdateCategoryV1Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateCategoryV1Request) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetCategoryId() <= 0 {
+		return UpdateCategoryV1RequestValidationError{
+			field:  "CategoryId",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if l := utf8.RuneCountInString(m.GetFoo()); l < 1 || l > 255 {
+		return UpdateCategoryV1RequestValidationError{
+			field:  "Foo",
+			reason: "value length must be between 1 and 255 runes, inclusive",
+		}
+	}
+
+	return nil
+}
+
+// UpdateCategoryV1RequestValidationError is the validation error returned by
+// UpdateCategoryV1Request.Validate if the designated constraints aren't met.
+type UpdateCategoryV1RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateCategoryV1RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateCategoryV1RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateCategoryV1RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateCategoryV1RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateCategoryV1RequestValidationError) ErrorName() string {
+	return "UpdateCategoryV1RequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateCategoryV1RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateCategoryV1Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateCategoryV1RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateCategoryV1RequestValidationError{}
+
+// Validate checks the field values on UpdateCategoryV1Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateCategoryV1Response) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Found
+
+	return nil
+}
+
+// UpdateCategoryV1ResponseValidationError is the validation error returned by
+// UpdateCategoryV1Response.Validate if the designated constraints aren't met.
+type UpdateCategoryV1ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateCategoryV1ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateCategoryV1ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateCategoryV1ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateCategoryV1ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateCategoryV1ResponseValidationError) ErrorName() string {
+	return "UpdateCategoryV1ResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateCategoryV1ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateCategoryV1Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateCategoryV1ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateCategoryV1ResponseValidationError{}
+
 // Validate checks the field values on RemoveCategoryV1Request with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.

@@ -229,6 +229,82 @@ func (c *categoryAPI) ListCategoriesV1(
 	}, nil
 }
 
+func (c *categoryAPI) UpdateCategoryV1(
+	ctx context.Context,
+	req *pb.UpdateCategoryV1Request,
+) (*pb.UpdateCategoryV1Response, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "UpdateCategoryV1")
+	defer span.Finish()
+
+	span.SetTag("handler", "UpdateCategoryV1")
+	span.SetTag("category_id", req.GetCategoryId())
+	span.SetTag("foo", req.GetFoo())
+
+	logger := applog.FromContext(ctx)
+
+	logger.Debug().
+		Str("handler", "UpdateCategoryV1").
+		Uint64("category_id", req.GetCategoryId()).
+		Str("foo", req.GetFoo()).
+		Msg("UpdateCategoryV1 called")
+
+	err := req.Validate()
+	if err != nil {
+		span.SetTag("error", true)
+		span.SetTag("validation_error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
+		logger.Warn().
+			Err(err).
+			Str("handler", "UpdateCategoryV1").
+			Msg("validation failed")
+
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	found, err := c.repo.Update(ctx, req.GetCategoryId(), req.GetFoo())
+	if err != nil {
+		span.SetTag("error", true)
+		span.LogFields(otlog.String("error", err.Error()))
+
+		logger.Error().
+			Err(err).
+			Str("handler", "UpdateCategoryV1").
+			Uint64("category_id", req.GetCategoryId()).
+			Str("foo", req.GetFoo()).
+			Msg("failed to update category")
+
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !found {
+		span.SetTag("not_found", true)
+		span.LogFields(otlog.String("event", "category not found"))
+
+		logger.Warn().
+			Str("handler", "UpdateCategoryV1").
+			Uint64("category_id", req.GetCategoryId()).
+			Bool("found", found).
+			Msg("category not found")
+
+		totalCategoryNotFound.Inc()
+	} else {
+		totalCategoryCUDEvents.WithLabelValues("update").Inc()
+		span.SetTag("updated", true)
+
+		logger.Debug().
+			Str("handler", "UpdateCategoryV1").
+			Uint64("category_id", req.GetCategoryId()).
+			Str("foo", req.GetFoo()).
+			Bool("found", found).
+			Msg("category updated")
+	}
+
+	return &pb.UpdateCategoryV1Response{
+		Found: found,
+	}, nil
+}
+
 func (c *categoryAPI) RemoveCategoryV1(
 	ctx context.Context,
 	req *pb.RemoveCategoryV1Request,

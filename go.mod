@@ -14,6 +14,7 @@ require (
 	github.com/pressly/goose/v3 v3.1.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rs/zerolog v1.35.1
+	github.com/segmentio/kafka-go v0.4.51
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/vvvvgross/catalog-category-api/pkg/catalog-category-api v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.81.1
@@ -47,7 +48,6 @@ require (
 	github.com/prometheus/common v0.63.0 // indirect
 	github.com/prometheus/procfs v0.16.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/segmentio/kafka-go v0.4.51 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	go.uber.org/atomic v1.7.0 // indirect
