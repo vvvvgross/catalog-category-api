@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -14,13 +15,25 @@ import (
 	"github.com/vvvvgross/catalog-category-api/internal/config"
 )
 
+type categoryPayload struct {
+	CategoryID uint64 `json:"category_id"`
+	Foo        string `json:"foo"`
+}
+
 func main() {
 	log.SetOutput(os.Stdout)
 
-	if err := config.ReadConfigYML("config.yml"); err != nil {
+	configPath := flag.String("config", "config.yml", "path to config file")
+	flag.Parse()
+
+	if err := config.ReadConfigYML(*configPath); err != nil {
 		log.Fatalf("Failed init configuration: %v", err)
 	}
+
 	cfg := config.GetConfigInstance()
+
+	log.Printf("Config path: %s", *configPath)
+	log.Printf("Kafka brokers: %v", cfg.Kafka.Brokers)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

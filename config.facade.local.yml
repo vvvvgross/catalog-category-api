@@ -1,0 +1,19 @@
+database:
+  host: localhost
+  port: 5433
+  user: docker
+  password: docker
+  name: catalog_category_facade
+  sslmode: disable
+  migrations: migrations-facade
+  driver: pgx
+
+kafka:
+  capacity: 512
+  groupId: "catalog-category-facade"
+  brokers:
+    - "localhost:9094"
+  topics:
+    created: "catalog.category.created"
+    updated: "catalog.category.updated"
+    removed: "catalog.category.removed"

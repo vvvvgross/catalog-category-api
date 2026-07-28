@@ -1,0 +1,11 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS categories (
+    id BIGINT PRIMARY KEY,
+    foo TEXT NOT NULL,
+    removed BOOLEAN NOT NULL DEFAULT FALSE,
+    created TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS categories;

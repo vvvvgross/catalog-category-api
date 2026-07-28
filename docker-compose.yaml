@@ -62,6 +62,18 @@ services:
       # - pgdata:/var/lib/postgresql/data
       - ./scripts/init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
 
+  postgres-facade:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: catalog_category_facade
+    networks:
+      - ompnw
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.3
     restart: unless-stopped
