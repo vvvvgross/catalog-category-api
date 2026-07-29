@@ -107,12 +107,11 @@ func main() {
 
 func runReader(ctx context.Context, brokers []string, groupID string, topic string, configuredTopics categoryTopics, categoryRepo facade.CategoryRepo) {
 	readerConfig := kafka.ReaderConfig{
-		Brokers:        brokers,
-		Topic:          topic,
-		GroupID:        groupID,
-		MinBytes:       1,
-		MaxBytes:       10e6,
-		CommitInterval: time.Second, // Раз в секунду автоматически фиксируем прочитанные сообщения
+		Brokers:  brokers,
+		Topic:    topic,
+		GroupID:  groupID,
+		MinBytes: 1,
+		MaxBytes: 10e6,
 	}
 
 	reader := kafka.NewReader(readerConfig)
@@ -127,7 +126,7 @@ func runReader(ctx context.Context, brokers []string, groupID string, topic stri
 	log.Printf("Listening to topic: %s", topic)
 
 	for {
-		msg, err := reader.ReadMessage(ctx)
+		msg, err := reader.FetchMessage(ctx)
 
 		if err != nil {
 			if ctx.Err() != nil {
@@ -139,22 +138,52 @@ func runReader(ctx context.Context, brokers []string, groupID string, topic stri
 			continue
 		}
 
-		err = handleMessage(ctx, msg.Topic, msg.Value, configuredTopics, categoryRepo)
+		for {
 
-		if err != nil {
-			log.Printf(
-				"Failed to process message from topic %s, partition %d, offset %d: %v",
-				msg.Topic,
-				msg.Partition,
-				msg.Offset,
-				err,
-			)
+			err = handleMessage(ctx, msg.Topic, msg.Value, configuredTopics, categoryRepo)
 
-			continue
+			if err != nil {
+				log.Printf(
+					"Failed to process message from topic %s, partition %d, offset %d: %v",
+					msg.Topic,
+					msg.Partition,
+					msg.Offset,
+					err,
+				)
+
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(time.Second):
+				}
+			}
+			break
+		}
+
+		for {
+
+			err = reader.CommitMessages(ctx, msg)
+			if err != nil {
+				log.Printf(
+					"Failed to commit message from topic %s, partition %d, offset %d: %v",
+					msg.Topic,
+					msg.Partition,
+					msg.Offset,
+					err,
+				)
+
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(time.Second):
+				}
+			}
+
+			break
 		}
 
 		log.Printf(
-			"Processed message: Topic: %s | Key: %s | Value: %s | Partition: %d | Offset: %d",
+			"Processed and committed message: Topic: %s | Key: %s | Value: %s | Partition: %d | Offset: %d",
 			msg.Topic,
 			string(msg.Key),
 			string(msg.Value),
