@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -23,6 +24,12 @@ import (
 type categoryPayload struct {
 	CategoryID uint64 `json:"category_id"`
 	Foo        string `json:"foo"`
+}
+
+type categoryTopics struct {
+	Created string
+	Updated string
+	Removed string
 }
 
 func main() {
@@ -69,20 +76,26 @@ func main() {
 
 	log.Println("Facade server starting...")
 
-	topics := []string{
-		cfg.Kafka.Topics.Created,
-		cfg.Kafka.Topics.Updated,
-		cfg.Kafka.Topics.Removed,
+	configuredTopics := categoryTopics{
+		Created: cfg.Kafka.Topics.Created,
+		Updated: cfg.Kafka.Topics.Updated,
+		Removed: cfg.Kafka.Topics.Removed,
+	}
+
+	topicList := []string{
+		configuredTopics.Created,
+		configuredTopics.Updated,
+		configuredTopics.Removed,
 	}
 
 	var wg sync.WaitGroup
 
-	for _, topic := range topics {
+	for _, topic := range topicList {
 		wg.Add(1)
 
 		go func(topic string) {
 			defer wg.Done()
-			runReader(ctx, cfg.Kafka.Brokers, cfg.Kafka.GroupID, topic, categoryRepo)
+			runReader(ctx, cfg.Kafka.Brokers, cfg.Kafka.GroupID, topic, configuredTopics, categoryRepo)
 		}(topic)
 	}
 
@@ -92,7 +105,7 @@ func main() {
 	log.Println("Facade server stopped.")
 }
 
-func runReader(ctx context.Context, brokers []string, groupID string, topic string, categoryRepo facade.CategoryRepo) {
+func runReader(ctx context.Context, brokers []string, groupID string, topic string, configuredTopics categoryTopics, categoryRepo facade.CategoryRepo) {
 	readerConfig := kafka.ReaderConfig{
 		Brokers:        brokers,
 		Topic:          topic,
@@ -115,18 +128,33 @@ func runReader(ctx context.Context, brokers []string, groupID string, topic stri
 
 	for {
 		msg, err := reader.ReadMessage(ctx)
+
 		if err != nil {
 			if ctx.Err() != nil {
-				log.Println("Context canceled, stopping reader loop.")
+				log.Printf("Reader for topic %s stopped: %v", topic, ctx.Err())
 				break
 			}
 
-			log.Printf("Error while reading message: %v", err)
+			log.Printf("Failed to read message from topic %s: %v", topic, err)
+			continue
+		}
+
+		err = handleMessage(ctx, msg.Topic, msg.Value, configuredTopics, categoryRepo)
+
+		if err != nil {
+			log.Printf(
+				"Failed to process message from topic %s, partition %d, offset %d: %v",
+				msg.Topic,
+				msg.Partition,
+				msg.Offset,
+				err,
+			)
+
 			continue
 		}
 
 		log.Printf(
-			"Received message: Topic: %s | Key: %s | Value: %s | Partition: %d | Offset: %d",
+			"Processed message: Topic: %s | Key: %s | Value: %s | Partition: %d | Offset: %d",
 			msg.Topic,
 			string(msg.Key),
 			string(msg.Value),
@@ -134,4 +162,50 @@ func runReader(ctx context.Context, brokers []string, groupID string, topic stri
 			msg.Offset,
 		)
 	}
+}
+
+func handleMessage(ctx context.Context, topic string, value []byte, topics categoryTopics, categoryRepo facade.CategoryRepo) error {
+	var payload categoryPayload
+
+	if err := json.Unmarshal(value, &payload); err != nil {
+		return fmt.Errorf("decode category event: %w", err)
+	}
+
+	if payload.CategoryID == 0 {
+		return fmt.Errorf("category event contains invalid category_id")
+	}
+
+	switch topic {
+	case topics.Created:
+		if payload.Foo == "" {
+			return fmt.Errorf("category event contains invalid foo")
+		}
+
+		if err := categoryRepo.Upsert(
+			ctx,
+			payload.CategoryID,
+			payload.Foo,
+		); err != nil {
+			return fmt.Errorf("process created category event: %w", err)
+		}
+
+	case topics.Updated:
+		if payload.Foo == "" {
+			return fmt.Errorf("category event contains invalid foo")
+		}
+
+		if err := categoryRepo.Upsert(ctx, payload.CategoryID, payload.Foo); err != nil {
+			return fmt.Errorf("process updated category event: %w", err)
+		}
+
+	case topics.Removed:
+		if err := categoryRepo.MarkRemoved(ctx, payload.CategoryID); err != nil {
+			return fmt.Errorf("process removed category event: %w", err)
+		}
+
+	default:
+		return fmt.Errorf("unsupported category topic: %s", topic)
+	}
+
+	return nil
 }
