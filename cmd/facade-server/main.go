@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,9 +11,13 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pressly/goose/v3"
 	"github.com/segmentio/kafka-go"
 
 	"github.com/vvvvgross/catalog-category-api/internal/config"
+	"github.com/vvvvgross/catalog-category-api/internal/database"
+	"github.com/vvvvgross/catalog-category-api/internal/facade"
 )
 
 type categoryPayload struct {
@@ -23,7 +28,8 @@ type categoryPayload struct {
 func main() {
 	log.SetOutput(os.Stdout)
 
-	configPath := flag.String("config", "config.yml", "path to config file")
+	configPath := flag.String("config", "config.facade.local.yml", "path to config file")
+	migration := flag.Bool("migration", true, "Defines the migration start option")
 	flag.Parse()
 
 	if err := config.ReadConfigYML(*configPath); err != nil {
@@ -34,6 +40,29 @@ func main() {
 
 	log.Printf("Config path: %s", *configPath)
 	log.Printf("Kafka brokers: %v", cfg.Kafka.Brokers)
+
+	dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v dbname=%v sslmode=%v",
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Name,
+		cfg.Database.SslMode,
+	)
+
+	db, err := database.NewPostgres(dsn, cfg.Database.Driver)
+	if err != nil {
+		log.Fatalf("Failed init postgres: %v", err)
+	}
+	defer db.Close()
+
+	if *migration {
+		if err = goose.Up(db.DB, cfg.Database.Migrations); err != nil {
+			log.Fatalf("Migration faileds: %v", err)
+		}
+	}
+
+	categoryRepo := facade.NewCategoryRepo(db)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -53,7 +82,7 @@ func main() {
 
 		go func(topic string) {
 			defer wg.Done()
-			runReader(ctx, cfg.Kafka.Brokers, cfg.Kafka.GroupID, topic)
+			runReader(ctx, cfg.Kafka.Brokers, cfg.Kafka.GroupID, topic, categoryRepo)
 		}(topic)
 	}
 
@@ -63,7 +92,7 @@ func main() {
 	log.Println("Facade server stopped.")
 }
 
-func runReader(ctx context.Context, brokers []string, groupID string, topic string) {
+func runReader(ctx context.Context, brokers []string, groupID string, topic string, categoryRepo facade.CategoryRepo) {
 	readerConfig := kafka.ReaderConfig{
 		Brokers:        brokers,
 		Topic:          topic,
